@@ -10,24 +10,21 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// COURSES
-model Courses {
-  id          String   @id @default(uuid())
-  name        String   @unique
-  description String?
-  duration    Int
-  created_at  DateTime @default(now())
-  teacher     Teachers @relation(fields: [teacher_id], references: [id])
-  teacher_id  String   @unique
+// AUTHOR
+model Author {
+  id    String  @id @default(uuid())
+  name  String
+  books Books[]
 
-  @@map("courses") // defini o nome da tabela como será criado no banco de dados
+  @@map("authors")
 }
 
-// TEACHERS
-model Teachers {
-  id     String   @id @default(uuid())
-  name   String   @unique
-  course Courses?
+// BOOKS
+model Books {
+  id        String @id @default(uuid())
+  name      String
+  author_id String
+  author    Author @relation(fields: [author_id], references: [id])
 
-  @@map("teachers")
+  @@map("books")
 }

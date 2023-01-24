@@ -3,13 +3,12 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 async function main() {
-  const result = await prisma.courses.create({
+  const result = await prisma.books.create({
     data: {
-      name: 'Curso de NextJS',
-      description: 'Curso excelente de NextJS',
-      duration: 200,
+      name: 'Arquitetura limpa',
+      author_id: '8428fc1e-b450-4085-a416-e8a757930679'
     }
-  });
+  })
 
   console.log(result);
 }
