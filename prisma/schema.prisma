@@ -10,21 +10,35 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// AUTHOR
-model Author {
-  id    String  @id @default(uuid())
-  name  String
-  books Books[]
+// COURSES
+model Courses {
+  id             String           @id @default(uuid())
+  name           String
+  description    String
+  duration       Int
+  CoursesModules CoursesModules[]
 
-  @@map("authors")
+  @@map("coursers")
 }
 
-// BOOKS
-model Books {
-  id        String @id @default(uuid())
-  name      String
-  author_id String
-  author    Author @relation(fields: [author_id], references: [id])
+// MODULES
+model Modules {
+  id             String           @id @default(uuid())
+  name           String
+  description    String
+  CoursesModules CoursesModules[]
 
-  @@map("books")
+  @@map("modules")
+}
+
+// MANY TO MANY
+model CoursesModules {
+  id         String   @id @default(uuid())
+  courses_id String
+  modules_id String
+  created_at DateTime @default(now())
+  course     Courses  @relation(fields: [courses_id], references: [id])
+  module     Modules  @relation(fields: [modules_id], references: [id])
+
+  @@map("courses_modules")
 }
