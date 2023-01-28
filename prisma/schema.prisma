@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -10,35 +7,175 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// COURSES
-model Courses {
-  id             String           @id @default(uuid())
-  name           String
-  description    String
-  duration       Int
-  CoursesModules CoursesModules[]
-
-  @@map("coursers")
+model adoptions {
+  id                                    String   @id(map: "PK_f3897fdb8f8f34600711b59183b") @db.Uuid
+  short_code                            String?  @db.VarChar
+  old_tutor_id                          String   @db.Uuid
+  tutor_id                              String   @db.Uuid
+  pet_id                                String   @db.Uuid
+  created_at                            DateTime @default(now()) @db.Timestamptz(6)
+  updated_at                            DateTime @default(now()) @db.Timestamptz(6)
+  tutors_adoptions_old_tutor_idTotutors tutors   @relation("adoptions_old_tutor_idTotutors", fields: [old_tutor_id], references: [id], onDelete: Cascade, map: "FKAdoptionOldTutor")
+  pets                                  pets     @relation(fields: [pet_id], references: [id], onDelete: Cascade, map: "FKAdoptionPet")
+  tutors_adoptions_tutor_idTotutors     tutors   @relation("adoptions_tutor_idTotutors", fields: [tutor_id], references: [id], onDelete: SetNull, onUpdate: SetNull, map: "FKAdoptionTutor")
 }
 
-// MODULES
-model Modules {
-  id             String           @id @default(uuid())
-  name           String
-  description    String
-  CoursesModules CoursesModules[]
-
-  @@map("modules")
+model categories {
+  id         String   @id(map: "PK_24dbc6126a28ff948da33e97d3b") @db.Uuid
+  name       String   @db.VarChar
+  icon       String?  @db.VarChar
+  enabled    Boolean  @default(true)
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+  updated_at DateTime @default(now()) @db.Timestamptz(6)
+  pets       pets[]
 }
 
-// MANY TO MANY
-model CoursesModules {
-  id         String   @id @default(uuid())
-  courses_id String
-  modules_id String
-  created_at DateTime @default(now())
-  course     Courses  @relation(fields: [courses_id], references: [id])
-  module     Modules  @relation(fields: [modules_id], references: [id])
+model looking_for_pet_images {
+  id                 String           @id(map: "PK_40d9608848bc2c5e5aaae368365") @db.Uuid
+  looking_for_pet_id String           @db.Uuid
+  image              String           @db.VarChar
+  created_at         DateTime         @default(now()) @db.Timestamptz(6)
+  looking_for_pets   looking_for_pets @relation(fields: [looking_for_pet_id], references: [id], onDelete: Cascade, map: "FKLookingForPetsImageLookingForPet")
+}
 
-  @@map("courses_modules")
+model looking_for_pets {
+  id                      String                   @id(map: "PK_be8ba64518495573b19d149d993") @db.Uuid
+  name_pet                String                   @db.VarChar
+  breed                   String                   @db.VarChar
+  gender                  String                   @db.VarChar
+  name_tutor              String                   @db.VarChar
+  phone_tutor             String                   @db.VarChar
+  phone_tutor_is_whatsapp Boolean
+  last_seen               String                   @db.VarChar
+  description             String                   @db.VarChar
+  is_found                Boolean                  @default(false)
+  is_reward               Boolean                  @default(false)
+  reward_amount           Decimal                  @default(0) @db.Decimal
+  avatar                  String                   @db.VarChar
+  state                   String                   @db.VarChar
+  city                    String                   @db.VarChar
+  enabled                 Boolean                  @default(false)
+  tutor_id                String?                  @db.Uuid
+  user_id                 String?                  @db.Uuid
+  created_at              DateTime                 @default(now()) @db.Timestamptz(6)
+  updated_at              DateTime                 @default(now()) @db.Timestamptz(6)
+  looking_for_pet_images  looking_for_pet_images[]
+}
+
+model migrations {
+  id        Int    @id(map: "PK_8c82d7f526340ab734260ea46be") @default(autoincrement())
+  timestamp BigInt
+  name      String @db.VarChar
+}
+
+model pet_images {
+  id         String   @id(map: "PK_775f799e0181f91eefaa6ccd1de") @db.Uuid
+  pet_id     String   @db.Uuid
+  image      String   @db.VarChar
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+  pets       pets     @relation(fields: [pet_id], references: [id], onDelete: Cascade, map: "FKPetsImagePet")
+}
+
+model pets {
+  id          String       @id(map: "PK_d01e9e7b4ada753c826720bee8b") @db.Uuid
+  name        String       @db.VarChar
+  birthday    DateTime     @db.Date
+  breed       String       @db.VarChar
+  category_id String       @db.Uuid
+  gender      String       @db.VarChar
+  height      String       @db.VarChar
+  weight      String       @db.VarChar
+  avatar      String?      @db.VarChar
+  tutor_id    String       @db.Uuid
+  adopted     Boolean      @default(false)
+  description String       @db.VarChar
+  created_at  DateTime     @default(now()) @db.Timestamptz(6)
+  updated_at  DateTime     @default(now()) @db.Timestamptz(6)
+  city        String?      @db.VarChar
+  state       String?      @db.VarChar
+  adoptions   adoptions[]
+  pet_images  pet_images[]
+  categories  categories   @relation(fields: [category_id], references: [id], onDelete: Cascade, map: "FKPetCategory")
+  tutors      tutors       @relation(fields: [tutor_id], references: [id], onDelete: Cascade, map: "FKPetTutor")
+}
+
+model tutors {
+  id                                       String                    @id(map: "PK_bab3e19eb9a7a36a6a95377963b") @db.Uuid
+  name                                     String                    @db.VarChar
+  email                                    String?                   @db.VarChar
+  password                                 String?                   @db.VarChar
+  type                                     String                    @db.VarChar
+  cnpj_cpf                                 String                    @db.VarChar
+  manager_ong                              String?                   @db.VarChar
+  avatar                                   String?                   @db.VarChar
+  personal_phone                           String                    @db.VarChar
+  personal_phone_is_whatsapp               Boolean
+  public_phone                             String?                   @db.VarChar
+  public_phone_is_whatsapp                 Boolean?
+  enabled                                  Boolean                   @default(true)
+  street_name                              String                    @db.VarChar
+  street_number                            String                    @db.VarChar
+  complement                               String?                   @db.VarChar
+  neighborhood                             String                    @db.VarChar
+  postal_code                              String?                   @db.VarChar
+  reference                                String?                   @db.VarChar
+  state                                    String                    @db.VarChar
+  city                                     String                    @db.VarChar
+  created_at                               DateTime                  @default(now()) @db.Timestamptz(6)
+  updated_at                               DateTime                  @default(now()) @db.Timestamptz(6)
+  adoptions_adoptions_old_tutor_idTotutors adoptions[]               @relation("adoptions_old_tutor_idTotutors")
+  adoptions_adoptions_tutor_idTotutors     adoptions[]               @relation("adoptions_tutor_idTotutors")
+  pets                                     pets[]
+  tutors_refreshes_tokens                  tutors_refreshes_tokens[]
+}
+
+model tutors_refreshes_tokens {
+  id            String   @id(map: "PK_71f581ea972a5d332635502834b") @db.Uuid
+  refresh_token String   @db.VarChar
+  tutor_id      String   @db.Uuid
+  expires_date  DateTime @db.Timestamp(6)
+  created_at    DateTime @default(now()) @db.Timestamptz(6)
+  tutors        tutors   @relation(fields: [tutor_id], references: [id], onDelete: Cascade, map: "FKTutorRefreshToken")
+}
+
+model user_tokens {
+  id         String   @id(map: "PK_63764db9d9aaa4af33e07b2f4bf") @db.Uuid
+  token      String   @db.Uuid
+  user_id    String   @db.Uuid
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+  updated_at DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model users {
+  id                     String                   @id(map: "PK_a3ffb1c0c8416b9fc6f907b7433") @db.Uuid
+  name                   String                   @db.VarChar
+  email                  String                   @unique(map: "UQ_97672ac88f789774dd47f7c8be3") @db.VarChar
+  password               String                   @db.VarChar
+  type                   String                   @db.VarChar
+  enabled                Boolean                  @default(true)
+  avatar                 String?                  @db.VarChar
+  created_at             DateTime                 @default(now()) @db.Timestamptz(6)
+  updated_at             DateTime                 @default(now()) @db.Timestamptz(6)
+  users_refreshes_tokens users_refreshes_tokens[]
+}
+
+model users_refreshes_tokens {
+  id            String   @id(map: "PK_701498d1b38b90669f9a544d11c") @db.Uuid
+  refresh_token String   @db.VarChar
+  user_id       String   @db.Uuid
+  expires_date  DateTime @db.Timestamp(6)
+  created_at    DateTime @default(now()) @db.Timestamptz(6)
+  users         users    @relation(fields: [user_id], references: [id], onDelete: Cascade, map: "FKUserRefreshToken")
+}
+
+model writers {
+  id         String   @id(map: "PK_9b15ff1c2dff5079a773e982567") @db.Uuid
+  name       String   @db.VarChar
+  email      String   @db.VarChar
+  password   String   @db.VarChar
+  avatar     String?  @db.VarChar
+  instagram  String?  @db.VarChar
+  enabled    Boolean  @default(true)
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+  update_at  DateTime @default(now()) @db.Timestamptz(6)
 }
